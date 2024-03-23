@@ -8,11 +8,36 @@
 import SwiftUI
 
 struct CharacterView: View {
+    
+    @StateObject var characterVM = CharacterVM()
+    let charUrl: String
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack{
+            if let character = characterVM.character {
+                HStack{
+                    AsyncImage(url: URL(string: character.image)) { image in
+                        image.image?
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150, alignment: .center)
+                            .padding()
+                    }
+                    Text(character.name)
+                        .frame(width: 100, height: 100, alignment: .center)
+                }
+            }
+        }
+        .onAppear{
+            characterVM.fetchCharacter(url: charUrl) { error in
+                if let error = error {
+                    print(error.localizedDescription)
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    CharacterView()
+    CharacterView(charUrl: "https://rickandmortyapi.com/api/character/38")
 }
