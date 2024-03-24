@@ -18,56 +18,60 @@ struct LocationView: View {
     
     
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack{
-                ForEach(viewModel.locations, id:\.id) { location in
-                    Button(action: {
-                        selectedLocation = location
-                        characters = location.residents
-                        print(location.name)
-                    }, label: {
-                        Text(location.name)
-                            .foregroundStyle(.black)
-                            .padding()
-                            .background {
-                                Rectangle()
-                                    .foregroundStyle(selectedLocation == location ? .gray.opacity(0.5) : .gray)
-                                    .clipShape(.buttonBorder)
+            NavigationStack {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        LazyHStack{
+                            ForEach(viewModel.locations, id:\.id) { location in
+                                Button(action: {
+                                    selectedLocation = location
+                                    characters = location.residents
+                                }, label: {
+                                    Text(location.name)
+                                        .foregroundStyle(selectedLocation == location ? .white : .black)
+                                        .padding()
+                                        .background {
+                                            Rectangle()
+                                                .foregroundStyle(selectedLocation == location ? .gray.opacity(0.5) : .gray)
+                                                .clipShape(.buttonBorder)
+                                        }
+                                })
+                                .padding(5)
                             }
-                    })
-                    .padding(5)
-                }
+                        }
+                    }
+                    .background(Color("bgcolor").ignoresSafeArea())
+                    .padding(.bottom, 250)
+                    
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(spacing: 20){
+                            ForEach(characters, id:\.self) { chars in
+                                CharacterView(charUrl: chars)
+                            }
+                            
+                        }
+                    }
+                    .background(Color("bgcolor").ignoresSafeArea())
+                    .padding(.top, -270)
             }
-        }
-        .onAppear {
-            viewModel.fetchLocations { error in
-                if let error = error {
-                    print(error.localizedDescription)
-                } else if let firstLocation = viewModel.locations.first {
-                    DispatchQueue.main.async {
-                        selectedLocation = firstLocation
-                        print(firstLocation.name)
+            .onAppear {
+                viewModel.fetchLocations { error in
+                    if let error = error {
+                        print(error.localizedDescription)
+                    } else if let firstLocation = viewModel.locations.first {
+                        DispatchQueue.main.async {
+                            selectedLocation = firstLocation
+                        }
                     }
                 }
             }
-        }
-        .onChange(of: viewModel.locations, { oldValue, newValue in
-            if let firstLocation = viewModel.locations.first {
-                selectedLocation = firstLocation
-            }
-            if let residents = selectedLocation?.residents {
-                characters = residents
-            }
-        })
-        
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack{
-                ForEach(characters, id:\.self) { chars in
-                    CharacterView(charUrl: chars)
+            .onChange(of: viewModel.locations, { oldValue, newValue in
+                if let firstLocation = viewModel.locations.first {
+                    selectedLocation = firstLocation
                 }
-            }
-        }
-        .padding()
+                if let residents = selectedLocation?.residents {
+                    characters = residents
+                }
+        })
     }
     
     func fetchCharacters(){

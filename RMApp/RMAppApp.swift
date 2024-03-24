@@ -11,7 +11,7 @@ import SwiftUI
 struct RMAppApp: App {
     var body: some Scene {
         WindowGroup {
-            LocationView()
+            SplashView()
         }
     }
 }
